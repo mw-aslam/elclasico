@@ -187,23 +187,28 @@ export default function AdminPage() {
     }
     setIsAuthorized(true);
     setIsCheckingAuth(false);
-    setPlayers(getStoredPlayers());
-    setSlots(getStoredSlots());
-    setMatches(getStoredMatches());
-    setAttendance(getStoredAttendance());
 
-    // 1. Initial live sync
-    syncFromRemote();
+    // IMPORTANT: Do NOT load from localStorage first.
+    // localStorage may have stale/broken data from old sessions.
+    // Instead, load from Supabase immediately. Show empty state until sync completes.
+    // Only fall back to localStorage if Supabase fails (handled inside syncFromRemote).
+    syncFromRemote().then(() => {
+      // If Supabase returned nothing (offline/error), fall back to localStorage
+      setPlayers(prev => prev.length === 0 ? getStoredPlayers() : prev);
+      setSlots(prev => Object.keys(prev).length === 0 ? getStoredSlots() : prev);
+      setMatches(prev => prev.length === 0 ? getStoredMatches() : prev);
+    });
 
-    // 2. Poll every 4 seconds for live sync
-    const interval = setInterval(syncFromRemote, 4000);
-
+    // NO 4-second polling in admin - it causes save button to flash/re-render
+    // Admin is the SOURCE of truth; user panel polls instead
+    // Only re-sync when user switches back to this tab
     const handleFocus = () => syncFromRemote();
     window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
     };
   }, [router]);
 
