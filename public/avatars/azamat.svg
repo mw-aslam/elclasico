@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgLiv" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#2e090f"/>
+      <stop offset="50%" stopColor="#15080c"/>
+      <stop offset="100%" stopColor="#080a12"/>
+    </linearGradient>
+    <radialGradient id="redGlow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stopColor="#c8102e" stopOpacity="0.35"/>
+      <stop offset="60%" stopColor="#c8102e" stopOpacity="0.05"/>
+      <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+    </radialGradient>
+    <linearGradient id="kitRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#dc2626"/>
+      <stop offset="100%" stopColor="#991b1b"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bgLiv)"/>
+  <circle cx="200" cy="160" r="150" fill="url(#redGlow)"/>
+  <circle cx="200" cy="180" r="140" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 6" opacity="0.4"/>
+  <circle cx="200" cy="130" r="48" fill="#e2c499"/>
+  <path d="M 155 125 C 155 80, 245 80, 245 125 C 235 105, 225 95, 200 95 C 175 95, 165 105, 155 125 Z" fill="#1f1810"/>
+  <path d="M 188 172 L 212 172 L 216 195 L 184 195 Z" fill="#d4b285"/>
+  <path d="M 130 200 C 150 192, 175 190, 200 190 C 225 190, 250 192, 270 200 L 295 245 L 265 260 L 255 240 L 255 350 L 145 350 L 145 240 L 135 260 L 105 245 Z" fill="url(#kitRed)"/>
+  <path d="M 180 190 L 200 215 L 220 190 C 210 195, 190 195, 180 190 Z" fill="#ffffff"/>
+  <!-- Captain Armband on sleeve -->
+  <rect x="110" y="240" width="22" height="12" rx="3" fill="#fbbf24"/>
+  <text x="121" y="250" font-family="system-ui, sans-serif" font-weight="900" font-size="9" fill="#000" text-anchor="middle">C</text>
+  <circle cx="170" cy="235" r="10" fill="#fbbf24" opacity="0.9"/>
+  <text x="200" y="275" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="42" fill="#ffffff" text-anchor="middle" letter-spacing="-1">4</text>
+  <rect x="100" y="340" width="200" height="34" rx="8" fill="#0c101d" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="200" y="362" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ef4444" text-anchor="middle" letter-spacing="2">AZAMAT • CB #4 (C)</text>
+</svg>

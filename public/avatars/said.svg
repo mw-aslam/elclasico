@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgReal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#1e2538"/>
+      <stop offset="50%" stopColor="#0f1422"/>
+      <stop offset="100%" stopColor="#070912"/>
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stopColor="#f5c542" stopOpacity="0.35"/>
+      <stop offset="60%" stopColor="#f5c542" stopOpacity="0.05"/>
+      <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+    </radialGradient>
+    <linearGradient id="kitWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#ffffff"/>
+      <stop offset="100%" stopColor="#d1d5db"/>
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#ffd700"/>
+      <stop offset="100%" stopColor="#f5c542"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#bgReal)"/>
+  <circle cx="200" cy="160" r="150" fill="url(#goldGlow)"/>
+
+  <!-- Halo ring -->
+  <circle cx="200" cy="180" r="140" fill="none" stroke="#f5c542" stroke-width="2" stroke-dasharray="6 6" opacity="0.4"/>
+
+  <!-- Stylized Player Head & Hair -->
+  <circle cx="200" cy="130" r="48" fill="#e2c499"/>
+  <path d="M 155 125 C 155 85, 245 85, 245 125 C 235 105, 225 100, 200 100 C 175 100, 165 105, 155 125 Z" fill="#1f1810"/>
+  <!-- Neck -->
+  <path d="M 188 172 L 212 172 L 216 195 L 184 195 Z" fill="#d4b285"/>
+
+  <!-- Jersey (Real Madrid White & Gold #10) -->
+  <path d="M 130 200 C 150 192, 175 190, 200 190 C 225 190, 250 192, 270 200 L 295 245 L 265 260 L 255 240 L 255 350 L 145 350 L 145 240 L 135 260 L 105 245 Z" fill="url(#kitWhite)"/>
+  
+  <!-- Collar & Gold trims -->
+  <path d="M 180 190 L 200 215 L 220 190 C 210 195, 190 195, 180 190 Z" fill="#f5c542"/>
+  <path d="M 105 245 L 135 260 L 132 250 L 110 238 Z" fill="#f5c542"/>
+  <path d="M 295 245 L 265 260 L 268 250 L 290 238 Z" fill="#f5c542"/>
+
+  <!-- Real Madrid Crest Silhouette on Chest -->
+  <circle cx="170" cy="235" r="10" fill="#f5c542" opacity="0.9"/>
+
+  <!-- Shirt Number 10 -->
+  <text x="200" y="275" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="42" fill="#1e2538" text-anchor="middle" letter-spacing="-1">10</text>
+  
+  <!-- Player Name Banner -->
+  <rect x="110" y="340" width="180" height="34" rx="8" fill="#0c101d" stroke="#f5c542" stroke-width="1.5"/>
+  <text x="200" y="362" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="14" fill="#f5c542" text-anchor="middle" letter-spacing="2">SAID • #10</text>
+</svg>
