@@ -11,6 +11,7 @@ import PlayerEditModal from '../components/PlayerEditModal';
 import RatingAnalytics from '../components/RatingAnalytics';
 import TeamLeaderboard from '../components/TeamLeaderboard';
 import ConfirmModal from '../components/ConfirmModal';
+import { getSupabaseData } from '../lib/supabase';
 import {
   INITIAL_ALL_PLAYERS,
   INITIAL_SLOT_ASSIGNMENTS,
@@ -85,10 +86,35 @@ export default function HomePage() {
   const [leaderboardPeriod, setLeaderboardPeriod] = useState('all'); // 'weekly', 'monthly', 'yearly', 'all'
   const [toastMessage, setToastMessage] = useState('');
 
-  // Continuous Live Auto-Sync: Polls server every 3.5s and on tab focus
+  // Continuous Live Auto-Sync: Queries Supabase directly (zero proxy lag) and polls every 3.5s
   const syncFromRemote = async () => {
+    // 1. Direct Supabase Query (Instant, no Vercel proxy / auth interference)
     try {
-      const res = await fetch('/api/data', { cache: 'no-store' });
+      const supa = await getSupabaseData();
+      if (supa) {
+        if (Array.isArray(supa.matches)) {
+          setMatches(supa.matches);
+          saveStoredMatches(supa.matches, false);
+        }
+        if (Array.isArray(supa.players) && supa.players.length > 0) {
+          setPlayers(supa.players);
+          saveStoredPlayers(supa.players, false);
+        }
+        if (supa.attendance && typeof supa.attendance === 'object') {
+          setAttendance(supa.attendance);
+          saveStoredAttendance(supa.attendance, false);
+        }
+        if (supa.slots && typeof supa.slots === 'object' && Object.keys(supa.slots).length > 0) {
+          setSlots(supa.slots);
+          saveStoredSlots(supa.slots, false);
+        }
+        return;
+      }
+    } catch (e) {}
+
+    // 2. Fallback to /api/data
+    try {
+      const res = await fetch('/api/data?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
       if (d && !d.error) {
