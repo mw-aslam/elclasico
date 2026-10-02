@@ -15,6 +15,7 @@ import {
   deleteStoredMatch,
   getStoredAttendance,
   saveStoredAttendance,
+  saveStoredBatch,
   generateScheduleWeeks,
   getAdminAuth,
   setAdminAuth,
@@ -118,7 +119,33 @@ export default function AdminPage() {
   });
   const [matchPlayerStats, setMatchPlayerStats] = useState([]);
 
-  // Check Persistent Auth & Load Data
+  // Check Persistent Auth & Live Data Sync
+  const syncFromRemote = async () => {
+    try {
+      const res = await fetch('/api/data', { cache: 'no-store' });
+      if (!res.ok) return;
+      const d = await res.json();
+      if (d && !d.error) {
+        if (Array.isArray(d.matches)) {
+          setMatches(d.matches);
+          saveStoredMatches(d.matches, false);
+        }
+        if (Array.isArray(d.players) && d.players.length > 0) {
+          setPlayers(d.players);
+          saveStoredPlayers(d.players, false);
+        }
+        if (d.attendance && typeof d.attendance === 'object') {
+          setAttendance(d.attendance);
+          saveStoredAttendance(d.attendance, false);
+        }
+        if (d.slots && typeof d.slots === 'object' && Object.keys(d.slots).length > 0) {
+          setSlots(d.slots);
+          saveStoredSlots(d.slots, false);
+        }
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
     if (!getAdminAuth()) {
       router.push('/login');
@@ -129,30 +156,19 @@ export default function AdminPage() {
     setMatches(getStoredMatches());
     setAttendance(getStoredAttendance());
 
-    // Auto-sync from server API
-    fetch('/api/data')
-      .then(r => r.json())
-      .then(d => {
-        if (d && !d.error) {
-          if (Array.isArray(d.matches)) {
-            setMatches(d.matches);
-            saveStoredMatches(d.matches);
-          }
-          if (Array.isArray(d.players)) {
-            setPlayers(d.players);
-            saveStoredPlayers(d.players);
-          }
-          if (d.attendance && typeof d.attendance === 'object') {
-            setAttendance(d.attendance);
-            saveStoredAttendance(d.attendance);
-          }
-          if (d.slots && typeof d.slots === 'object') {
-            setSlots(d.slots);
-            saveStoredSlots(d.slots);
-          }
-        }
-      })
-      .catch(() => {});
+    // 1. Initial live sync
+    syncFromRemote();
+
+    // 2. Poll every 4 seconds for live sync
+    const interval = setInterval(syncFromRemote, 4000);
+
+    const handleFocus = () => syncFromRemote();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [router]);
 
   const showToast = (msg) => {
@@ -528,9 +544,11 @@ export default function AdminPage() {
 
     const updatedMatches = [newMatchRecord, ...matches];
     setMatches(updatedMatches);
-    saveStoredMatches(updatedMatches);
     setPlayers(currentPlayers);
-    saveStoredPlayers(currentPlayers);
+    saveStoredBatch({
+      matches: updatedMatches,
+      players: currentPlayers,
+    });
 
     setMatchPlayerStats([]);
     showToast("Uchrashuv muvaffaqiyatli saqlandi va o'yinchilar reytingi yangilandi!");

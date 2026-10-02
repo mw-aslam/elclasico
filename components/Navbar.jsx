@@ -40,9 +40,9 @@ export default function Navbar() {
             Tarkib
           </a>
           {isAdmin && (
-            <a href="#attendance-section" className="hover:text-emerald-400 text-emerald-300 transition py-1 font-bold">
+            <Link href="/admin" className="hover:text-emerald-400 text-emerald-300 transition py-1 font-bold">
               Davomat
-            </a>
+            </Link>
           )}
           <a href="#leaderboard-section" className="hover:text-white transition py-1">
             Jamoalar
@@ -98,13 +98,13 @@ export default function Navbar() {
             Tarkib (Kartochkalar)
           </a>
           {isAdmin && (
-            <a
-              href="#attendance-section"
+            <Link
+              href="/admin"
               onClick={() => setMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-lg text-emerald-300 font-bold hover:bg-white/[0.06]"
             >
               Davomat (Admin)
-            </a>
+            </Link>
           )}
           <a
             href="#leaderboard-section"

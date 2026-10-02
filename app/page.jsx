@@ -10,7 +10,6 @@ import SlotActionModal from '../components/SlotActionModal';
 import PlayerEditModal from '../components/PlayerEditModal';
 import RatingAnalytics from '../components/RatingAnalytics';
 import TeamLeaderboard from '../components/TeamLeaderboard';
-import AttendanceSection from '../components/AttendanceSection';
 import ConfirmModal from '../components/ConfirmModal';
 import {
   INITIAL_ALL_PLAYERS,
@@ -23,6 +22,7 @@ import {
   getStoredMatches,
   deleteStoredMatch,
   getStoredAttendance,
+  saveStoredAttendance,
   assignSlot,
   removeSlot,
   FORMATION_REAL,
@@ -85,7 +85,33 @@ export default function HomePage() {
   const [leaderboardPeriod, setLeaderboardPeriod] = useState('all'); // 'weekly', 'monthly', 'yearly', 'all'
   const [toastMessage, setToastMessage] = useState('');
 
-  // Initial Data Load & Auto-sync across devices via Server API
+  // Continuous Live Auto-Sync: Polls server every 3.5s and on tab focus
+  const syncFromRemote = async () => {
+    try {
+      const res = await fetch('/api/data', { cache: 'no-store' });
+      if (!res.ok) return;
+      const d = await res.json();
+      if (d && !d.error) {
+        if (Array.isArray(d.matches)) {
+          setMatches(d.matches);
+          saveStoredMatches(d.matches, false);
+        }
+        if (Array.isArray(d.players) && d.players.length > 0) {
+          setPlayers(d.players);
+          saveStoredPlayers(d.players, false);
+        }
+        if (d.attendance && typeof d.attendance === 'object') {
+          setAttendance(d.attendance);
+          saveStoredAttendance(d.attendance, false);
+        }
+        if (d.slots && typeof d.slots === 'object' && Object.keys(d.slots).length > 0) {
+          setSlots(d.slots);
+          saveStoredSlots(d.slots, false);
+        }
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
     setPlayers(getStoredPlayers());
     setSlots(getStoredSlots());
@@ -93,30 +119,25 @@ export default function HomePage() {
     setAttendance(getStoredAttendance());
     setIsAdmin(getAdminAuth());
 
-    // Auto-sync from server so all phones and PCs see the exact same data
-    fetch('/api/data')
-      .then(r => r.json())
-      .then(d => {
-        if (d && !d.error) {
-          if (Array.isArray(d.matches)) {
-            setMatches(d.matches);
-            saveStoredMatches(d.matches);
-          }
-          if (Array.isArray(d.players)) {
-            setPlayers(d.players);
-            saveStoredPlayers(d.players);
-          }
-          if (d.attendance && typeof d.attendance === 'object') {
-            setAttendance(d.attendance);
-            saveStoredAttendance(d.attendance);
-          }
-          if (d.slots && typeof d.slots === 'object') {
-            setSlots(d.slots);
-            saveStoredSlots(d.slots);
-          }
-        }
-      })
-      .catch(() => {});
+    // 1. Initial fetch immediately
+    syncFromRemote();
+
+    // 2. Poll every 3.5 seconds so all changes appear live without reloading
+    const interval = setInterval(syncFromRemote, 3500);
+
+    // 3. Re-fetch on focus / phone screen wake
+    const handleFocus = () => {
+      syncFromRemote();
+      setIsAdmin(getAdminAuth());
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, []);
 
   const showToast = (msg) => {
@@ -310,7 +331,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#07090f] text-zinc-100 selection:bg-amber-400 selection:text-black pb-28 md:pb-0">
+    <div className="min-h-screen bg-[#07090f] text-zinc-100 selection:bg-amber-400 selection:text-black pb-12">
       
       {/* Toast Alert */}
       {toastMessage && (
@@ -342,77 +363,62 @@ export default function HomePage() {
             </div>
 
             {/* TEAM SWITCHER SEGMENTED CONTROL (100% RESPONSIVE) */}
-            <div className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex items-center p-1 sm:p-1.5 rounded-xl bg-black/60 border border-white/10 text-[11px] sm:text-xs font-bold shadow-inner">
+            <div className="w-full sm:w-auto flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-[11px] sm:text-xs font-bold shadow-inner gap-1">
               <button
                 onClick={() => setActiveTeam('Real')}
-                className={`py-2 px-1.5 sm:px-4 rounded-lg transition duration-200 text-center ${
+                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-4 rounded-lg transition duration-200 text-center truncate ${
                   activeTeam === 'Real'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-300 hover:text-white'
                 }`}
               >
-                <span className="sm:hidden">Real ({realPlayers.length})</span>
-                <span className="hidden sm:inline">Real Madrid ({realPlayers.length})</span>
+                Real Madrid ({realPlayers.length})
               </button>
               <button
                 onClick={() => setActiveTeam('Liverpool')}
-                className={`py-2 px-1.5 sm:px-4 rounded-lg transition duration-200 text-center ${
+                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-4 rounded-lg transition duration-200 text-center truncate ${
                   activeTeam === 'Liverpool'
                     ? 'bg-red-600 text-white font-extrabold shadow-md'
                     : 'text-zinc-300 hover:text-white'
                 }`}
               >
-                <span className="sm:hidden">Liverpool ({liverpoolPlayers.length})</span>
-                <span className="hidden sm:inline">Liverpool FC ({liverpoolPlayers.length})</span>
+                Liverpool ({liverpoolPlayers.length})
               </button>
               <button
                 onClick={() => setActiveTeam('ALL')}
-                className={`py-2 px-1.5 sm:px-3.5 rounded-lg transition duration-200 text-center ${
+                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-3.5 rounded-lg transition duration-200 text-center truncate ${
                   activeTeam === 'ALL'
                     ? 'bg-zinc-700 text-white font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                <span className="sm:hidden">Barchasi ({players.length})</span>
-                <span className="hidden sm:inline">Hammasi ({players.length})</span>
+                Hammasi ({players.length})
               </button>
             </div>
           </div>
 
           {/* Quick Metrics KPI Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-white/[0.08]">
-            <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <div className="text-[10px] uppercase font-mono text-zinc-400">Real Madrid</div>
-              <div className="text-lg font-mono font-bold text-white mt-0.5">{realPlayers.length} futbolchi</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-3 border-t border-white/[0.08]">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/40 border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-mono text-zinc-400 truncate">Real Madrid</div>
+              <div className="text-base sm:text-lg font-mono font-bold text-white mt-0.5">{realPlayers.length} futbolchi</div>
             </div>
-            <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <div className="text-[10px] uppercase font-mono text-zinc-400">Liverpool FC</div>
-              <div className="text-lg font-mono font-bold text-white mt-0.5">{liverpoolPlayers.length} futbolchi</div>
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/40 border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-mono text-zinc-400 truncate">Liverpool FC</div>
+              <div className="text-base sm:text-lg font-mono font-bold text-white mt-0.5">{liverpoolPlayers.length} futbolchi</div>
             </div>
-            <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <div className="text-[10px] uppercase font-mono text-zinc-400">Jami Gollar</div>
-              <div className="text-lg font-mono font-bold text-white mt-0.5">{totalGoals} ta</div>
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/40 border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-mono text-zinc-400 truncate">Jami Gollar</div>
+              <div className="text-base sm:text-lg font-mono font-bold text-white mt-0.5">{totalGoals} ta</div>
             </div>
-            <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <div className="text-[10px] uppercase font-mono text-zinc-400">Yetakchi</div>
-              <div className="text-lg font-mono font-bold text-amber-400 mt-0.5 truncate">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/40 border border-white/[0.06]">
+              <div className="text-[10px] uppercase font-mono text-zinc-400 truncate">Yetakchi</div>
+              <div className="text-base sm:text-lg font-mono font-bold text-amber-400 mt-0.5 truncate">
                 {topRated?.name || "Asliddin"} ({Number(topRated?.rating || 0).toFixed(1)})
               </div>
             </div>
           </div>
         </section>
-
-        {/* ========================================================
-            SECTION: ATTENDANCE (DAVOMAT) - ONLY VISIBLE IF ADMIN LOGGED IN
-           ======================================================== */}
-        {isAdmin && (
-          <AttendanceSection
-            attendance={attendance}
-            players={players}
-            isAdmin={isAdmin}
-            onAttendanceSaved={(newAtt) => setAttendance(newAtt)}
-          />
-        )}
 
         {/* ========================================================
             SECTION: TEAM LEADERBOARD (REAL MADRID VS LIVERPOOL FC)
@@ -718,39 +724,6 @@ export default function HomePage() {
         </section>
 
       </main>
-
-      {/* Sleek Mobile Bottom Dock */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090c15]/95 backdrop-blur-2xl border-t border-white/10 px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-2xl">
-        <div className="grid grid-cols-5 items-center text-center">
-          <a href="#pitch-section" className="flex flex-col items-center py-1 text-zinc-400 hover:text-white transition">
-            <span className="text-base leading-none mb-1">⚽</span>
-            <span className="text-[9px] font-bold tracking-tight">Taktika</span>
-          </a>
-          <a href="#cards-section" className="flex flex-col items-center py-1 text-zinc-400 hover:text-white transition">
-            <span className="text-base leading-none mb-1">🎴</span>
-            <span className="text-[9px] font-bold tracking-tight">Tarkib</span>
-          </a>
-          {isAdmin ? (
-            <a href="#attendance-section" className="flex flex-col items-center py-1 text-emerald-400 hover:text-emerald-300 transition">
-              <span className="text-base leading-none mb-1">📅</span>
-              <span className="text-[9px] font-bold tracking-tight">Davomat</span>
-            </a>
-          ) : (
-            <a href="#analytics-section" className="flex flex-col items-center py-1 text-zinc-400 hover:text-amber-300 transition">
-              <span className="text-base leading-none mb-1">📊</span>
-              <span className="text-[9px] font-bold tracking-tight">Grafik</span>
-            </a>
-          )}
-          <a href="#leaderboard-section" className="flex flex-col items-center py-1 text-zinc-400 hover:text-amber-300 transition">
-            <span className="text-base leading-none mb-1">🏆</span>
-            <span className="text-[9px] font-bold tracking-tight">Jamoalar</span>
-          </a>
-          <a href="/admin" className="flex flex-col items-center py-1 text-zinc-400 hover:text-white transition">
-            <span className="text-base leading-none mb-1">🔒</span>
-            <span className="text-[9px] font-bold tracking-tight">{isAdmin ? 'Admin' : 'Kirish'}</span>
-          </a>
-        </div>
-      </div>
 
       {/* Footer (Desktop & Mobile) */}
       <footer className="mt-16 border-t border-white/[0.08] py-8 text-center text-xs text-zinc-400 font-mono">
