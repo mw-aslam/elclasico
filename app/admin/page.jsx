@@ -128,25 +128,28 @@ export default function AdminPage() {
     try {
       const supa = await getSupabaseData();
       if (supa) {
-        if (Array.isArray(supa.matches)) {
-          setMatches(supa.matches);
-          saveStoredMatches(supa.matches, false);
-        }
+        // ALWAYS trust Supabase data completely
         if (Array.isArray(supa.players) && supa.players.length > 0) {
           setPlayers(supa.players);
-          saveStoredPlayers(supa.players, false);
+          localStorage.setItem('clasico_squad_v25', JSON.stringify(supa.players));
+        }
+        if (Array.isArray(supa.matches)) {
+          setMatches(supa.matches);
+          localStorage.setItem('clasico_matches_v25', JSON.stringify(supa.matches));
         }
         if (supa.attendance && typeof supa.attendance === 'object') {
           setAttendance(supa.attendance);
-          saveStoredAttendance(supa.attendance, false);
+          localStorage.setItem('clasico_attendance_v25', JSON.stringify(supa.attendance));
         }
         if (supa.slots && typeof supa.slots === 'object' && Object.keys(supa.slots).length > 0) {
           setSlots(supa.slots);
-          saveStoredSlots(supa.slots, false);
+          localStorage.setItem('clasico_slots_v25', JSON.stringify(supa.slots));
         }
-        return;
+        return; // success
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[Admin Sync] Supabase error:', e?.message || e);
+    }
 
     // 2. Fallback to /api/data
     try {
@@ -154,24 +157,26 @@ export default function AdminPage() {
       if (!res.ok) return;
       const d = await res.json();
       if (d && !d.error) {
-        if (Array.isArray(d.matches)) {
-          setMatches(d.matches);
-          saveStoredMatches(d.matches, false);
-        }
         if (Array.isArray(d.players) && d.players.length > 0) {
           setPlayers(d.players);
-          saveStoredPlayers(d.players, false);
+          localStorage.setItem('clasico_squad_v25', JSON.stringify(d.players));
+        }
+        if (Array.isArray(d.matches)) {
+          setMatches(d.matches);
+          localStorage.setItem('clasico_matches_v25', JSON.stringify(d.matches));
         }
         if (d.attendance && typeof d.attendance === 'object') {
           setAttendance(d.attendance);
-          saveStoredAttendance(d.attendance, false);
+          localStorage.setItem('clasico_attendance_v25', JSON.stringify(d.attendance));
         }
         if (d.slots && typeof d.slots === 'object' && Object.keys(d.slots).length > 0) {
           setSlots(d.slots);
-          saveStoredSlots(d.slots, false);
+          localStorage.setItem('clasico_slots_v25', JSON.stringify(d.slots));
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[Admin Sync] API fallback error:', e?.message || e);
+    }
   };
 
   useEffect(() => {
