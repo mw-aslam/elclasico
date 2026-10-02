@@ -61,7 +61,7 @@ export default function Navbar() {
         {/* Right Action: Clean Admin Button */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/admin"
+            href={isAdmin ? "/admin" : "/login"}
             className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-zinc-200 hover:text-white text-xs font-semibold uppercase tracking-wider transition"
           >
             {isAdmin && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
@@ -135,11 +135,11 @@ export default function Navbar() {
             O'yinlar Tarixi
           </a>
           <Link
-            href="/admin"
+            href={isAdmin ? "/admin" : "/login"}
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-amber-400 hover:bg-white/[0.06]"
           >
-            Admin Panel
+            {isAdmin ? 'Admin Panel' : 'Admin Kirish'}
           </Link>
         </div>
       )}

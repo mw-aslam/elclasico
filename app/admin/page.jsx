@@ -45,6 +45,8 @@ export default function AdminPage() {
   const router = useRouter();
   const fileInputRef = useRef(null);
 
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [activeTab, setActiveTab] = useState('match'); // 'match', 'history', 'attendance', 'players', 'swap'
   const [players, setPlayers] = useState([]);
   const [slots, setSlots] = useState({});
@@ -173,10 +175,13 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (!getAdminAuth()) {
-      router.push('/login');
+    const isAuth = getAdminAuth();
+    if (!isAuth) {
+      router.replace('/login');
       return;
     }
+    setIsAuthorized(true);
+    setIsCheckingAuth(false);
     setPlayers(getStoredPlayers());
     setSlots(getStoredSlots());
     setMatches(getStoredMatches());
@@ -674,6 +679,17 @@ export default function AdminPage() {
     if (selectedTeamFilter === 'ALL') return true;
     return p.team === selectedTeamFilter;
   });
+
+  if (isCheckingAuth || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-[#07090f] flex items-center justify-center text-zinc-400">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs uppercase tracking-widest font-mono text-zinc-500">Tekshirilmoqda...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#07090f] text-zinc-100 selection:bg-amber-400 selection:text-black pb-12">

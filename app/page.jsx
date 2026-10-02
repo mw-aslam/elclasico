@@ -389,36 +389,39 @@ export default function HomePage() {
             </div>
 
             {/* TEAM SWITCHER SEGMENTED CONTROL (100% RESPONSIVE) */}
-            <div className="w-full sm:w-auto flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-[11px] sm:text-xs font-bold shadow-inner gap-1">
+            <div className="w-full sm:w-auto grid grid-cols-3 sm:flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-[11px] sm:text-xs font-bold shadow-inner gap-1">
               <button
                 onClick={() => setActiveTeam('Real')}
-                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-4 rounded-lg transition duration-200 text-center truncate ${
+                className={`py-2 px-2 sm:px-4 rounded-lg transition duration-200 text-center truncate whitespace-nowrap ${
                   activeTeam === 'Real'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-300 hover:text-white'
                 }`}
               >
-                Real Madrid ({realPlayers.length})
+                <span className="sm:hidden">RMA ({realPlayers.length})</span>
+                <span className="hidden sm:inline">Real Madrid ({realPlayers.length})</span>
               </button>
               <button
                 onClick={() => setActiveTeam('Liverpool')}
-                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-4 rounded-lg transition duration-200 text-center truncate ${
+                className={`py-2 px-2 sm:px-4 rounded-lg transition duration-200 text-center truncate whitespace-nowrap ${
                   activeTeam === 'Liverpool'
                     ? 'bg-red-600 text-white font-extrabold shadow-md'
                     : 'text-zinc-300 hover:text-white'
                 }`}
               >
-                Liverpool ({liverpoolPlayers.length})
+                <span className="sm:hidden">LIV ({liverpoolPlayers.length})</span>
+                <span className="hidden sm:inline">Liverpool ({liverpoolPlayers.length})</span>
               </button>
               <button
                 onClick={() => setActiveTeam('ALL')}
-                className={`flex-1 sm:flex-initial py-2 px-2.5 sm:px-3.5 rounded-lg transition duration-200 text-center truncate ${
+                className={`py-2 px-2 sm:px-3.5 rounded-lg transition duration-200 text-center truncate whitespace-nowrap ${
                   activeTeam === 'ALL'
                     ? 'bg-zinc-700 text-white font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Hammasi ({players.length})
+                <span className="sm:hidden">Barchasi</span>
+                <span className="hidden sm:inline">Hammasi ({players.length})</span>
               </button>
             </div>
           </div>
@@ -586,46 +589,50 @@ export default function HomePage() {
             </div>
 
             {/* VAQT BO'YICHA REYTING FILTRI (Haftalik, Oylik, Yillik, Barcha Vaqt) */}
-            <div className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-xs font-mono font-bold shadow-inner gap-1">
+            <div className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex items-center p-1 rounded-xl bg-black/60 border border-white/10 text-xs font-mono font-bold shadow-inner gap-1">
               <button
                 onClick={() => setLeaderboardPeriod('weekly')}
-                className={`py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-center transition ${
+                className={`py-2 px-1 sm:px-3 sm:py-1.5 rounded-lg text-center transition whitespace-nowrap ${
                   leaderboardPeriod === 'weekly'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Haftalik (7 kun)
+                <span className="sm:hidden">Hafta</span>
+                <span className="hidden sm:inline">Haftalik (7 kun)</span>
               </button>
               <button
                 onClick={() => setLeaderboardPeriod('monthly')}
-                className={`py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-center transition ${
+                className={`py-2 px-1 sm:px-3 sm:py-1.5 rounded-lg text-center transition whitespace-nowrap ${
                   leaderboardPeriod === 'monthly'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Oylik (30 kun)
+                <span className="sm:hidden">Oy</span>
+                <span className="hidden sm:inline">Oylik (30 kun)</span>
               </button>
               <button
                 onClick={() => setLeaderboardPeriod('yearly')}
-                className={`py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-center transition ${
+                className={`py-2 px-1 sm:px-3 sm:py-1.5 rounded-lg text-center transition whitespace-nowrap ${
                   leaderboardPeriod === 'yearly'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Yillik
+                <span className="sm:hidden">Yil</span>
+                <span className="hidden sm:inline">Yillik</span>
               </button>
               <button
                 onClick={() => setLeaderboardPeriod('all')}
-                className={`py-2 px-2.5 sm:px-3 sm:py-1.5 rounded-lg text-center transition ${
+                className={`py-2 px-1 sm:px-3 sm:py-1.5 rounded-lg text-center transition whitespace-nowrap ${
                   leaderboardPeriod === 'all'
                     ? 'bg-amber-400 text-black font-extrabold shadow-md'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                Barcha Vaqt
+                <span className="sm:hidden">Barchasi</span>
+                <span className="hidden sm:inline">Barcha Vaqt</span>
               </button>
             </div>
           </div>
@@ -635,14 +642,14 @@ export default function HomePage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-black/50 border-b border-white/10 text-zinc-400 font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-3 w-10 text-center font-mono">#</th>
-                    <th className="py-3 px-3">O'yinchi</th>
-                    <th className="py-3 px-3">Jamoa</th>
-                    <th className="py-3 px-3">Pozitsiya</th>
-                    <th className="py-3 px-3 text-center">O'yin</th>
-                    <th className="py-3 px-3 text-center">Gol (+2)</th>
-                    <th className="py-3 px-3 text-center">Asist (+1.5)</th>
-                    <th className="py-3 px-4 text-right font-black text-white">Reyting</th>
+                    <th className="py-3 px-2 sm:px-3 w-8 sm:w-10 text-center font-mono">#</th>
+                    <th className="py-3 px-2 sm:px-3 whitespace-nowrap">O'yinchi</th>
+                    <th className="py-3 px-2 sm:px-3 whitespace-nowrap">Jamoa</th>
+                    <th className="py-3 px-2 sm:px-3 whitespace-nowrap">Poz</th>
+                    <th className="py-3 px-2 sm:px-3 text-center whitespace-nowrap">O'yin</th>
+                    <th className="py-3 px-2 sm:px-3 text-center whitespace-nowrap">Gol (+2)</th>
+                    <th className="py-3 px-2 sm:px-3 text-center whitespace-nowrap">Asist (+1.5)</th>
+                    <th className="py-3 px-3 sm:px-4 text-right font-black text-white whitespace-nowrap">Reyting</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
@@ -654,11 +661,11 @@ export default function HomePage() {
                         onClick={() => setSelectedPlayer(player)}
                         className="hover:bg-white/[0.02] cursor-pointer transition"
                       >
-                        <td className="py-3 px-3 text-center font-mono font-bold text-zinc-400">
+                        <td className="py-3 px-2 sm:px-3 text-center font-mono font-bold text-zinc-400">
                           {idx + 1}
                         </td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2.5">
+                        <td className="py-3 px-2 sm:px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-lg overflow-hidden bg-zinc-900 border border-white/15 shrink-0">
                               <img
                                 src={player.avatar || "/avatars/arslan.png"}
@@ -668,33 +675,34 @@ export default function HomePage() {
                               />
                             </div>
                             <div>
-                              <span className="font-bold text-white">{player.name}</span>
+                              <span className="font-bold text-white text-xs sm:text-sm">{player.name}</span>
                               {player.isCaptain && (
-                                <span className="ml-1.5 text-[9px] text-amber-400 font-bold">• 👑 Sardor</span>
+                                <span className="ml-1 text-[9px] text-amber-400 font-bold">• 👑 Sardor</span>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                        <td className="py-3 px-2 sm:px-3 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono whitespace-nowrap inline-flex items-center ${
                             isReal ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' : 'bg-red-600/10 text-red-300 border border-red-500/30'
                           }`}>
-                            {player.team === 'Real' ? 'Real Madrid' : 'Liverpool FC'}
+                            <span className="sm:hidden">{player.team === 'Real' ? 'RMA' : 'LIV'}</span>
+                            <span className="hidden sm:inline">{player.team === 'Real' ? 'Real Madrid' : 'Liverpool FC'}</span>
                           </span>
                         </td>
-                        <td className="py-3 px-3 font-mono text-zinc-400">
+                        <td className="py-3 px-2 sm:px-3 font-mono text-zinc-400 whitespace-nowrap">
                           {player.position}
                         </td>
-                        <td className="py-3 px-3 text-center font-mono text-zinc-400">
+                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-zinc-400 whitespace-nowrap">
                           {player.displayMatches || 0}
                         </td>
-                        <td className="py-3 px-3 text-center font-mono font-bold text-white">
+                        <td className="py-3 px-2 sm:px-3 text-center font-mono font-bold text-white whitespace-nowrap">
                           {player.displayGoals || 0}
                         </td>
-                        <td className="py-3 px-3 text-center font-mono text-zinc-300">
+                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-zinc-300 whitespace-nowrap">
                           {player.displayAssists || 0}
                         </td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-sm text-white">
+                        <td className="py-3 px-3 sm:px-4 text-right font-mono font-bold text-sm text-white whitespace-nowrap">
                           {Number(player.displayRating || 0).toFixed(1)}
                         </td>
                       </tr>
