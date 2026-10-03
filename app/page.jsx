@@ -30,6 +30,12 @@ import {
   FORMATION_LIVERPOOL,
   getAdminAuth,
   getPlayerPeriodStats,
+  sanitizePlayers,
+  safeLocalStorageSet,
+  STORAGE_PLAYERS_KEY,
+  STORAGE_SLOTS_KEY,
+  STORAGE_MATCHES_KEY,
+  STORAGE_ATTENDANCE_KEY,
 } from '../lib/data';
 
 export default function HomePage() {
@@ -94,25 +100,26 @@ export default function HomePage() {
       if (supa) {
         // ALWAYS trust Supabase - override local state completely
         if (Array.isArray(supa.players) && supa.players.length > 0) {
-          setPlayers(supa.players);
-          localStorage.setItem('clasico_squad_v25', JSON.stringify(supa.players));
+          const clean = sanitizePlayers(supa.players);
+          setPlayers(clean);
+          safeLocalStorageSet(STORAGE_PLAYERS_KEY, clean);
         }
         if (Array.isArray(supa.matches)) {
           setMatches(supa.matches);
-          localStorage.setItem('clasico_matches_v25', JSON.stringify(supa.matches));
+          safeLocalStorageSet(STORAGE_MATCHES_KEY, supa.matches);
         }
         if (supa.attendance && typeof supa.attendance === 'object') {
           setAttendance(supa.attendance);
-          localStorage.setItem('clasico_attendance_v25', JSON.stringify(supa.attendance));
+          safeLocalStorageSet(STORAGE_ATTENDANCE_KEY, supa.attendance);
         }
         if (supa.slots && typeof supa.slots === 'object' && Object.keys(supa.slots).length > 0) {
           setSlots(supa.slots);
-          localStorage.setItem('clasico_slots_v25', JSON.stringify(supa.slots));
+          safeLocalStorageSet(STORAGE_SLOTS_KEY, supa.slots);
         }
         return; // Success - don't fall through to API
       }
     } catch (e) {
-      console.error('[Sync] Supabase error:', e?.message || e);
+      console.warn('[Sync] Supabase error:', e?.message || e);
     }
 
     // 2. Fallback to /api/data (only if Supabase failed)
@@ -122,24 +129,25 @@ export default function HomePage() {
       const d = await res.json();
       if (d && !d.error) {
         if (Array.isArray(d.players) && d.players.length > 0) {
-          setPlayers(d.players);
-          localStorage.setItem('clasico_squad_v25', JSON.stringify(d.players));
+          const clean = sanitizePlayers(d.players);
+          setPlayers(clean);
+          safeLocalStorageSet(STORAGE_PLAYERS_KEY, clean);
         }
         if (Array.isArray(d.matches)) {
           setMatches(d.matches);
-          localStorage.setItem('clasico_matches_v25', JSON.stringify(d.matches));
+          safeLocalStorageSet(STORAGE_MATCHES_KEY, d.matches);
         }
         if (d.attendance && typeof d.attendance === 'object') {
           setAttendance(d.attendance);
-          localStorage.setItem('clasico_attendance_v25', JSON.stringify(d.attendance));
+          safeLocalStorageSet(STORAGE_ATTENDANCE_KEY, d.attendance);
         }
         if (d.slots && typeof d.slots === 'object' && Object.keys(d.slots).length > 0) {
           setSlots(d.slots);
-          localStorage.setItem('clasico_slots_v25', JSON.stringify(d.slots));
+          safeLocalStorageSet(STORAGE_SLOTS_KEY, d.slots);
         }
       }
     } catch (e) {
-      console.error('[Sync] API fallback error:', e?.message || e);
+      console.warn('[Sync] API fallback error:', e?.message || e);
     }
   };
 

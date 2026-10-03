@@ -297,16 +297,18 @@ export default function AttendanceSection({
               </button>
             )}
             {/* Desktop save button — NO animate-pulse to prevent flickering */}
+            {/* Save button — ALWAYS visible on mobile & desktop, NO flickering */}
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className={`hidden sm:flex items-center gap-2 px-5 py-2 rounded-xl font-mono text-xs font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-60 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 rounded-xl font-mono text-xs font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-60 shrink-0 ${
                 hasUnsavedChanges
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-lg shadow-emerald-500/30'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-300'
                   : 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/50'
               }`}
             >
-              {isSaving ? '⏳' : '💾'} {isSaving ? 'Saqlanmoqda...' : hasUnsavedChanges ? 'Saqlash *' : 'Saqlash'}
+              <span>{isSaving ? '⏳' : '💾'}</span>
+              <span>{isSaving ? 'Saqlanmoqda...' : hasUnsavedChanges ? 'Saqlash *' : 'Saqlash'}</span>
             </button>
           </div>
         )}
@@ -324,32 +326,32 @@ export default function AttendanceSection({
         </span>
         <span className="flex items-center gap-1.5 text-zinc-500 font-bold">
           <span className="w-5 h-5 rounded-full border-2 border-zinc-600 flex items-center justify-center text-[9px]">◯</span>
-          Belgilanmagan
+          Kutilmoqda
         </span>
       </div>
 
       {/* SINGLE UNIVERSAL ATTENDANCE TABLE — works on all devices */}
       <div className="rounded-xl bg-[#0c101d] border border-white/10 overflow-hidden shadow-xl">
         <div className="overflow-x-auto overflow-y-auto max-h-[70vh]">
-          <table className="text-left border-collapse text-xs w-full" style={{ minWidth: `${Math.max(360, 180 + sessions.length * 52)}px` }}>
+          <table className="text-left border-collapse text-xs w-full" style={{ minWidth: `${Math.max(340, 160 + sessions.length * 48)}px` }}>
 
             {/* Sticky header */}
             <thead className="bg-[#070a14] sticky top-0 z-30 border-b border-white/10">
               <tr>
-                {/* Name column */}
-                <th className="py-3 px-3 sticky left-0 z-40 bg-[#070a14] border-r border-white/10" style={{ minWidth: '150px' }}>
-                  <div className="font-black text-[11px] uppercase tracking-wider text-white">O'yinchi</div>
-                  <div className="text-[9px] font-mono text-zinc-500">{filteredPlayers.length} ta</div>
+                {/* Name column — sticky left */}
+                <th className="py-2.5 px-2 sm:px-3 sticky left-0 z-40 bg-[#070a14] border-r border-white/10 w-[115px] min-w-[115px] sm:w-[160px] sm:min-w-[160px]">
+                  <div className="font-black text-[10px] sm:text-[11px] uppercase tracking-wider text-white">O'yinchi</div>
+                  <div className="text-[8px] sm:text-[9px] font-mono text-zinc-500">{filteredPlayers.length} ta</div>
                 </th>
 
-                {/* % column */}
-                <th className="py-3 px-2 text-center sticky left-[150px] z-40 bg-[#070a14] border-r border-white/[0.08]" style={{ minWidth: '42px' }}>
+                {/* % column — NOT sticky so mobile has space for dates */}
+                <th className="py-2.5 px-1.5 text-center bg-[#070a14] border-r border-white/[0.08] min-w-[42px]">
                   <div className="font-black text-[10px] text-zinc-400">%</div>
                 </th>
 
                 {/* Date columns */}
                 {sessionStats.map(sess => (
-                  <th key={sess.date} className="py-2.5 px-1 text-center" style={{ minWidth: '48px' }}>
+                  <th key={sess.date} className="py-2.5 px-1 text-center min-w-[44px] sm:min-w-[50px]">
                     <div className="font-mono font-bold text-[11px] text-zinc-300">{sess.shortDate}</div>
                     <div className="text-[9px] font-mono text-zinc-500">{sess.dayName?.slice(0, 2)}</div>
                     {sess.isFuture ? (
@@ -366,7 +368,7 @@ export default function AttendanceSection({
 
                 {/* Quick mark header — only if admin */}
                 {isAdmin && sessions.length > 0 && (
-                  <th className="py-2 px-2 text-center" style={{ minWidth: '80px' }}>
+                  <th className="py-2 px-2 text-center min-w-[60px]">
                     <div className="text-[9px] font-mono text-zinc-600">Tezkor</div>
                   </th>
                 )}
@@ -382,9 +384,9 @@ export default function AttendanceSection({
                   <tr key={player.id} className="hover:bg-white/[0.02] transition group">
 
                     {/* Sticky player name */}
-                    <td className="py-2.5 px-3 sticky left-0 z-20 bg-[#0c101d] border-r border-white/10 group-hover:bg-[#0e1220]">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-zinc-900 border border-white/10 shrink-0">
+                    <td className="py-2 px-2 sm:px-3 sticky left-0 z-20 bg-[#0c101d] border-r border-white/10 group-hover:bg-[#0e1220] w-[115px] min-w-[115px] sm:w-[160px] sm:min-w-[160px]">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden bg-zinc-900 border border-white/10 shrink-0">
                           <img
                             src={player.avatar || '/avatars/asliddin.jpg'}
                             alt={player.name}
@@ -393,7 +395,7 @@ export default function AttendanceSection({
                           />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-white text-[11px] truncate flex items-center gap-1">
+                          <div className="font-bold text-white text-[11px] sm:text-xs truncate flex items-center gap-0.5 sm:gap-1">
                             <span className="truncate">{player.name}</span>
                             {player.isCaptain && <span className="text-[9px] text-amber-400 shrink-0">👑</span>}
                           </div>
@@ -407,14 +409,14 @@ export default function AttendanceSection({
                       </div>
                     </td>
 
-                    {/* % sticky col */}
-                    <td className="py-2.5 px-1.5 text-center sticky z-20 bg-[#0c101d] border-r border-white/[0.05] group-hover:bg-[#0e1220]" style={{ left: '150px' }}>
-                      <div className={`text-[11px] font-black font-mono ${
+                    {/* % col — non-sticky */}
+                    <td className="py-2 px-1 text-center bg-[#0c101d] border-r border-white/[0.05] group-hover:bg-[#0e1220] min-w-[42px]">
+                      <div className={`text-[10px] sm:text-[11px] font-black font-mono ${
                         rate >= 75 ? 'text-emerald-400' : rate >= 40 ? 'text-amber-400' : elapsedSessions.length === 0 ? 'text-zinc-600' : 'text-rose-400'
                       }`}>
                         {elapsedSessions.length === 0 ? '—' : `${rate}%`}
                       </div>
-                      <div className={`text-[8px] font-bold font-mono px-1 py-0.5 rounded border ${badgeColor} mt-0.5 whitespace-nowrap`}>
+                      <div className={`text-[8px] font-bold font-mono px-1 py-0.2 rounded border ${badgeColor} mt-0.5 whitespace-nowrap`}>
                         {badge}
                       </div>
                     </td>
@@ -427,12 +429,12 @@ export default function AttendanceSection({
                       const isAbsent = rec?.present === false;
 
                       return (
-                        <td key={sess.date} className="py-2 px-1 text-center align-middle">
+                        <td key={sess.date} className="py-1.5 px-0.5 sm:px-1 text-center align-middle">
                           <button
                             type="button"
                             onClick={() => handleCellClick(sess.date, player.id)}
                             disabled={isFuture || !isAdmin}
-                            className={`w-9 h-9 mx-auto rounded-full flex items-center justify-center transition-all select-none font-black text-sm ${
+                            className={`w-8 h-8 sm:w-9 sm:h-9 mx-auto rounded-full flex items-center justify-center transition-all select-none font-black text-xs sm:text-sm ${
                               isFuture
                                 ? 'bg-transparent text-zinc-700 cursor-default'
                                 : isPresent
@@ -440,7 +442,7 @@ export default function AttendanceSection({
                                 : isAbsent
                                 ? 'bg-rose-500/20 border-2 border-rose-500 text-rose-400 cursor-pointer active:scale-90 hover:scale-105'
                                 : isAdmin
-                                ? 'bg-white/[0.02] border-2 border-zinc-700/60 text-zinc-600 hover:border-zinc-400 cursor-pointer'
+                                ? 'bg-white/[0.02] border-2 border-zinc-700/60 text-zinc-600 hover:border-zinc-400 cursor-pointer active:scale-90'
                                 : 'bg-transparent border border-zinc-800 text-zinc-700 cursor-default'
                             }`}
                           >
@@ -460,8 +462,7 @@ export default function AttendanceSection({
 
                     {/* Quick mark column — only admin */}
                     {isAdmin && sessions.length > 0 && (
-                      <td className="py-2 px-2 text-center">
-                        {/* No per-player quick mark needed; handled via batch buttons */}
+                      <td className="py-2 px-2 text-center min-w-[60px]">
                       </td>
                     )}
 
@@ -474,19 +475,19 @@ export default function AttendanceSection({
             {isAdmin && (
               <tfoot className="bg-[#070a14] sticky bottom-0 z-30 border-t border-white/10">
                 <tr>
-                  <td className="py-2 px-3 sticky left-0 z-40 bg-[#070a14] text-[10px] font-mono font-bold text-zinc-400">
-                    Tezkor belgilash:
+                  <td className="py-2 px-2 sm:px-3 sticky left-0 z-40 bg-[#070a14] text-[9px] sm:text-[10px] font-mono font-bold text-zinc-400 border-r border-white/10 w-[115px] min-w-[115px] sm:w-[160px] sm:min-w-[160px]">
+                    Tezkor:
                   </td>
-                  <td className="sticky z-40 bg-[#070a14]" style={{ left: '150px' }}></td>
+                  <td className="bg-[#070a14] border-r border-white/[0.08] min-w-[42px]"></td>
                   {sessionStats.map(sess => (
-                    <td key={sess.date} className="py-2 px-1 text-center">
+                    <td key={sess.date} className="py-1.5 px-0.5 sm:px-1 text-center">
                       {!sess.isFuture && (
                         <div className="flex flex-col items-center gap-1">
                           <button
                             type="button"
                             title="Barchasini Keldi"
                             onClick={() => handleMarkAllDay(sess.date, true)}
-                            className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] hover:bg-emerald-500 hover:text-black cursor-pointer active:scale-90 transition font-black flex items-center justify-center"
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[9px] sm:text-[10px] hover:bg-emerald-500 hover:text-black cursor-pointer active:scale-90 transition font-black flex items-center justify-center"
                           >
                             ✓
                           </button>
@@ -494,7 +495,7 @@ export default function AttendanceSection({
                             type="button"
                             title="Barchasini Kelmadi"
                             onClick={() => handleMarkAllDay(sess.date, false)}
-                            className="w-6 h-6 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-[10px] hover:bg-rose-500 hover:text-white cursor-pointer active:scale-90 transition font-black flex items-center justify-center"
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-[9px] sm:text-[10px] hover:bg-rose-500 hover:text-white cursor-pointer active:scale-90 transition font-black flex items-center justify-center"
                           >
                             ✕
                           </button>

@@ -23,6 +23,13 @@ import {
   calculatePlayerRating,
   swapPlayerPositions,
   resetAllData,
+  compressImageFile,
+  sanitizePlayers,
+  safeLocalStorageSet,
+  STORAGE_PLAYERS_KEY,
+  STORAGE_SLOTS_KEY,
+  STORAGE_MATCHES_KEY,
+  STORAGE_ATTENDANCE_KEY,
 } from '../../lib/data';
 
 const PRESET_AVATARS = [
@@ -130,25 +137,26 @@ export default function AdminPage() {
       if (supa) {
         // ALWAYS trust Supabase data completely
         if (Array.isArray(supa.players) && supa.players.length > 0) {
-          setPlayers(supa.players);
-          localStorage.setItem('clasico_squad_v25', JSON.stringify(supa.players));
+          const cleanPlayers = sanitizePlayers(supa.players);
+          setPlayers(cleanPlayers);
+          safeLocalStorageSet(STORAGE_PLAYERS_KEY, cleanPlayers);
         }
         if (Array.isArray(supa.matches)) {
           setMatches(supa.matches);
-          localStorage.setItem('clasico_matches_v25', JSON.stringify(supa.matches));
+          safeLocalStorageSet(STORAGE_MATCHES_KEY, supa.matches);
         }
         if (supa.attendance && typeof supa.attendance === 'object') {
           setAttendance(supa.attendance);
-          localStorage.setItem('clasico_attendance_v25', JSON.stringify(supa.attendance));
+          safeLocalStorageSet(STORAGE_ATTENDANCE_KEY, supa.attendance);
         }
         if (supa.slots && typeof supa.slots === 'object' && Object.keys(supa.slots).length > 0) {
           setSlots(supa.slots);
-          localStorage.setItem('clasico_slots_v25', JSON.stringify(supa.slots));
+          safeLocalStorageSet(STORAGE_SLOTS_KEY, supa.slots);
         }
         return; // success
       }
     } catch (e) {
-      console.error('[Admin Sync] Supabase error:', e?.message || e);
+      console.warn('[Admin Sync] Supabase error:', e?.message || e);
     }
 
     // 2. Fallback to /api/data
@@ -158,24 +166,25 @@ export default function AdminPage() {
       const d = await res.json();
       if (d && !d.error) {
         if (Array.isArray(d.players) && d.players.length > 0) {
-          setPlayers(d.players);
-          localStorage.setItem('clasico_squad_v25', JSON.stringify(d.players));
+          const cleanPlayers = sanitizePlayers(d.players);
+          setPlayers(cleanPlayers);
+          safeLocalStorageSet(STORAGE_PLAYERS_KEY, cleanPlayers);
         }
         if (Array.isArray(d.matches)) {
           setMatches(d.matches);
-          localStorage.setItem('clasico_matches_v25', JSON.stringify(d.matches));
+          safeLocalStorageSet(STORAGE_MATCHES_KEY, d.matches);
         }
         if (d.attendance && typeof d.attendance === 'object') {
           setAttendance(d.attendance);
-          localStorage.setItem('clasico_attendance_v25', JSON.stringify(d.attendance));
+          safeLocalStorageSet(STORAGE_ATTENDANCE_KEY, d.attendance);
         }
         if (d.slots && typeof d.slots === 'object' && Object.keys(d.slots).length > 0) {
           setSlots(d.slots);
-          localStorage.setItem('clasico_slots_v25', JSON.stringify(d.slots));
+          safeLocalStorageSet(STORAGE_SLOTS_KEY, d.slots);
         }
       }
     } catch (e) {
-      console.error('[Admin Sync] API fallback error:', e?.message || e);
+      console.warn('[Admin Sync] API fallback error:', e?.message || e);
     }
   };
 
@@ -188,20 +197,23 @@ export default function AdminPage() {
     setIsAuthorized(true);
     setIsCheckingAuth(false);
 
-    // IMPORTANT: Do NOT load from localStorage first.
-    // localStorage may have stale/broken data from old sessions.
-    // Instead, load from Supabase immediately. Show empty state until sync completes.
-    // Only fall back to localStorage if Supabase fails (handled inside syncFromRemote).
-    syncFromRemote().then(() => {
-      // If Supabase returned nothing (offline/error), fall back to localStorage
-      setPlayers(prev => prev.length === 0 ? getStoredPlayers() : prev);
-      setSlots(prev => Object.keys(prev).length === 0 ? getStoredSlots() : prev);
-      setMatches(prev => prev.length === 0 ? getStoredMatches() : prev);
-    });
+    // Clean up old v25 corrupted keys to free up space
+    try {
+      localStorage.removeItem('clasico_squad_v25');
+      localStorage.removeItem('clasico_slots_v25');
+      localStorage.removeItem('clasico_matches_v25');
+      localStorage.removeItem('clasico_attendance_v25');
+    } catch (e) {}
 
-    // NO 4-second polling in admin - it causes save button to flash/re-render
-    // Admin is the SOURCE of truth; user panel polls instead
-    // Only re-sync when user switches back to this tab
+    // Load clean initial state from local, then sync fresh from Supabase
+    setPlayers(getStoredPlayers());
+    setSlots(getStoredSlots());
+    setMatches(getStoredMatches());
+    setAttendance(getStoredAttendance());
+
+    syncFromRemote();
+
+    // Re-sync on focus/visibility without polling flicker
     const handleFocus = () => syncFromRemote();
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleFocus);
@@ -249,18 +261,21 @@ export default function AdminPage() {
     });
   };
 
-  // Upload file from phone or PC
-  const handleFileChange = (e) => {
+  // Upload file from phone or PC with client-side compression (max 240px)
+  const handleFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      const dataUrl = loadEvent.target.result;
-      setPlayerForm(prev => ({ ...prev, avatar: dataUrl }));
-      showToast("Foto yuklandi!");
-    };
-    reader.readAsDataURL(file);
+    try {
+      showToast("Foto yuklanmoqda...");
+      const compressedUrl = await compressImageFile(file, 240, 0.8);
+      if (compressedUrl) {
+        setPlayerForm(prev => ({ ...prev, avatar: compressedUrl }));
+        showToast("Foto muvaffaqiyatli yuklandi! ✓");
+      }
+    } catch (err) {
+      showToast("Foto yuklashda xatolik yuz berdi.");
+    }
   };
 
   // ----------------------------------------------------

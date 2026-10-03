@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { calculatePlayerRating } from '../lib/data';
+import { calculatePlayerRating, compressImageFile } from '../lib/data';
 
 const PRESET_AVATARS = [
   { label: 'Asliddin', url: '/avatars/asliddin.jpg' },
@@ -68,17 +68,19 @@ export default function PlayerEditModal({ player, initialPosition, onSave, onClo
     }
   }, [player, initialPosition]);
 
-  // Handle Photo Upload from Mobile or PC
-  const handleFileChange = (e) => {
+  // Handle Photo Upload from Mobile or PC with client-side compression (max 240px)
+  const handleFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      const dataUrl = loadEvent.target.result;
-      setFormData(prev => ({ ...prev, avatar: dataUrl }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedUrl = await compressImageFile(file, 240, 0.8);
+      if (compressedUrl) {
+        setFormData(prev => ({ ...prev, avatar: compressedUrl }));
+      }
+    } catch (err) {
+      console.warn('Error compressing photo:', err);
+    }
   };
 
   const updateStat = (statKey, value) => {
