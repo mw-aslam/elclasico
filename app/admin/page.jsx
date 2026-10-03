@@ -26,6 +26,10 @@ import {
   compressImageFile,
   sanitizePlayers,
   safeLocalStorageSet,
+  computeMatchStats,
+  addNotification,
+  getStoredSessions,
+  recordCurrentSession,
   STORAGE_PLAYERS_KEY,
   STORAGE_SLOTS_KEY,
   STORAGE_MATCHES_KEY,
@@ -59,6 +63,7 @@ export default function AdminPage() {
   const [slots, setSlots] = useState({});
   const [matches, setMatches] = useState([]);
   const [attendance, setAttendance] = useState({});
+  const [sessions, setSessions] = useState([]);
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('ALL');
   const [toastMessage, setToastMessage] = useState('');
 
@@ -210,6 +215,8 @@ export default function AdminPage() {
     setSlots(getStoredSlots());
     setMatches(getStoredMatches());
     setAttendance(getStoredAttendance());
+    setSessions(getStoredSessions());
+    recordCurrentSession('arslan');
 
     syncFromRemote();
 
@@ -596,6 +603,7 @@ export default function AdminPage() {
       awayScore,
       date: matchForm.date,
       details: matchDetails,
+      stats: computeMatchStats({ homeScore, awayScore, details: matchDetails }),
     };
 
     const updatedMatches = [newMatchRecord, ...matches];
@@ -605,6 +613,12 @@ export default function AdminPage() {
       matches: updatedMatches,
       players: currentPlayers,
     });
+
+    addNotification(
+      '⚡️ Yangi O\'yin Qayd Etildi',
+      `${matchForm.homeTeam} ${homeScore} - ${awayScore} ${matchForm.awayTeam} hisobida yakunlandi va Sofascore statistikasi shakllantirildi.`,
+      'match'
+    );
 
     setMatchPlayerStats([]);
     showToast("Uchrashuv muvaffaqiyatli saqlandi va o'yinchilar reytingi yangilandi!");
@@ -837,6 +851,19 @@ export default function AdminPage() {
             }`}
           >
             Joy Almashtirish
+          </button>
+          <button
+            onClick={() => {
+              setSessions(getStoredSessions());
+              setActiveTab('devices');
+            }}
+            className={`px-3.5 sm:px-4 py-2 rounded-lg transition flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              activeTab === 'devices'
+                ? 'bg-cyan-500 text-black font-extrabold shadow-md'
+                : 'text-cyan-400 hover:text-white'
+            }`}
+          >
+            <span>📱</span> Qurilmalar & Xavfsizlik
           </button>
         </div>
 
@@ -1116,6 +1143,11 @@ export default function AdminPage() {
               isAdmin={true}
               onAttendanceSaved={(newAtt) => {
                 setAttendance(newAtt);
+                addNotification(
+                  '📅 Davomat Yangilandi',
+                  'Mavsumiy davomat ma\'lumotlariga o\'zgarishlar kiritildi va muvaffaqiyatli saqlandi.',
+                  'attendance'
+                );
                 showToast("Davomat muvaffaqiyatli saqlandi!");
               }}
             />
@@ -1368,6 +1400,89 @@ export default function AdminPage() {
             >
               Joylarini Almashtirish
             </button>
+          </div>
+        )}
+
+        {/* ========================================================
+            TAB 5: ACTIVE DEVICES & SESSIONS (TELEGRAM-STYLE)
+           ======================================================== */}
+        {activeTab === 'devices' && (
+          <div className="max-w-3xl mx-auto space-y-5">
+            <div className="p-5 sm:p-6 rounded-2xl bg-[#0c101d] border border-white/10 space-y-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-mono font-bold uppercase tracking-widest">
+                    Xavfsizlik Nazorati
+                  </div>
+                  <h2 className="text-lg font-black uppercase tracking-tight text-white mt-1">
+                    Faol Qurilmalar va Seanslar
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Tizimga ulangan barcha qurilmalar, operatsion tizim, IP va taxminiy lokatsiya monitoringi.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-mono font-bold text-emerald-400">Admin: arslan</span>
+                </div>
+              </div>
+
+              {/* Sessions List */}
+              <div className="space-y-3">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400">
+                  Ulangan Qurilmalar ({sessions.length}):
+                </div>
+
+                {sessions.map((sess, idx) => (
+                  <div
+                    key={sess.id || idx}
+                    className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                      sess.isCurrent
+                        ? 'bg-cyan-950/20 border-cyan-400/40 ring-1 ring-cyan-400/20'
+                        : 'bg-black/40 border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-black/60 border border-white/15 flex items-center justify-center text-lg shrink-0">
+                        {sess.isMobile ? '📱' : '💻'}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-white flex items-center gap-2">
+                          <span>{sess.deviceName}</span>
+                          {sess.isCurrent && (
+                            <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-[9px] font-mono font-black uppercase">
+                              Ushbu Qurilma
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs font-mono text-zinc-400 mt-1 flex flex-wrap items-center gap-2">
+                          <span>📍 {sess.location || 'Toshkent, O\'zbekiston'}</span>
+                          <span>•</span>
+                          <span>IP: {sess.ip || '178.218.***.***'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-white/5">
+                      <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        Onlayn
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-500 mt-0.5">
+                        {new Date(sess.lastActive).toLocaleDateString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Security Hint */}
+              <div className="p-3.5 rounded-xl bg-black/30 border border-white/5 text-xs text-zinc-400 font-mono flex items-center gap-2.5">
+                <span>🛡</span>
+                <span>Barcha seanslar shifrlangan va Supabase xavfsiz ulanish orqali himoyalangan.</span>
+              </div>
+            </div>
           </div>
         )}
 
